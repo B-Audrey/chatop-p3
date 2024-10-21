@@ -15,14 +15,12 @@ public class ChatopApplication {
 
 
     public static void main(String[] args) {
-        logger.info("Tentative de démarrage de l'application...");
         SpringApplication.run(ChatopApplication.class, args);
     }
 
     @EventListener(ApplicationReadyEvent.class)
     public void logOnStartup() {
-        logger.info("Connexion à la base de données réussie !");
-        logger.info("Application démarrée avec succès !");
+        logger.info("Application run successfully 🚀 !");
     }
 
 }
