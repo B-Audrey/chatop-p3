@@ -11,8 +11,7 @@ import org.springframework.context.event.EventListener;
 @SpringBootApplication
 public class ChatopApplication {
 
-    private static final Logger logger = LoggerFactory.getLogger(ChatopApplication.class);
-
+    public static final Logger logger = LoggerFactory.getLogger(ChatopApplication.class);
 
     public static void main(String[] args) {
         SpringApplication.run(ChatopApplication.class, args);
@@ -20,7 +19,8 @@ public class ChatopApplication {
 
     @EventListener(ApplicationReadyEvent.class)
     public void logOnStartup() {
-        logger.info("Application run successfully 🚀 !");
+        logger.info("Let's go 🚀 !");
     }
+
 
 }

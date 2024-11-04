@@ -3,63 +3,81 @@ package oc.chatopbackend.controller;
 import oc.chatopbackend.dto.AuthLoginDto;
 import oc.chatopbackend.dto.AuthRegisterDto;
 import oc.chatopbackend.entity.UserEntity;
-import oc.chatopbackend.repository.UserRepository;
-import org.apache.coyote.BadRequestException;
+import oc.chatopbackend.model.UserModel;
+import oc.chatopbackend.service.JwtService;
+import oc.chatopbackend.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.webjars.NotFoundException;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
-@Validated //force la validation des Dto sur chaque route
+@Validated
 public class AuthController {
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    public static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
-    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+    private final JwtService jwtService;
+    private final UserService userService;
+
+    @Autowired
+    public AuthController(JwtService jwtService, UserService userService) {
+        this.jwtService = jwtService;
+        this.userService = userService;
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserEntity> register(@RequestBody AuthRegisterDto authRegisterDto) throws Exception {
-        logger.info("je rentre dans la fn register avec, {}", authRegisterDto);
-        UserEntity user = userRepository.findByEmail(authRegisterDto.getEmail());
-        if (user != null) {
-            throw new BadRequestException("Email Already Exists");
+    public ResponseEntity register(@RequestBody AuthRegisterDto authRegisterDto) {
+        try {
+            UserEntity newUser = userService.registerUser(authRegisterDto);
+            UserModel createdUser = userService.convertToDto(newUser);
+            return ResponseEntity.ok(createdUser);
+        } catch (Exception e) {
+            String message = e.getMessage();
+            logger.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(message);
         }
-        logger.info("j ai pas de user, je peux créer le user");
-        UserEntity newUser = new UserEntity();
-        newUser.setEmail(authRegisterDto.getEmail());
-        newUser.setPassword(passwordEncoder.encode(authRegisterDto.getPassword()));
-        newUser.setName(authRegisterDto.getName());
-        logger.info("nouvel user {}", newUser);
-        userRepository.save(newUser);
-        logger.info("save ok je retourne le user");
-        return ResponseEntity.ok(newUser);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody AuthLoginDto authLoginDto) {
-        logger.info("je rentre au login");
-        UserEntity user = userRepository.findByEmail(authLoginDto.getEmail());
-        if (user == null) {
-            throw new NotFoundException("Unable to log in");
+    public ResponseEntity<Map<String, String>> login(@RequestBody AuthLoginDto authLoginDto) {
+        try {
+            UserEntity user = userService.getUserByEmail(authLoginDto.getEmail());
+            if (!userService.validatePassword(authLoginDto.getPassword(), user.getPassword())) {
+                throw new NotFoundException("Unable to log in");
+            }
+            String token = jwtService.generateToken(user);
+            Map<String, String> response = Map.of("token", token);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            String message = e.getMessage();
+            logger.error(message);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", message));
         }
-        if (!passwordEncoder.matches(authLoginDto.getPassword(), user.getPassword())) {
-            throw new NotFoundException("Unable to log in");
+    }
+
+    @GetMapping("/me")
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ResponseEntity getTokenFromRequest(@RequestHeader("Authorization") String authorizationHeader) throws Exception {
+        try {
+            String token = authorizationHeader.substring(7);
+            Map<String, Object> decodedJwtData = jwtService.decryptUserByItsToken(token);
+            String userIdStr = (String) decodedJwtData.get("jti");
+            int userId = Integer.parseInt(userIdStr);
+            UserModel user = userService.getUserById(userId);
+            return ResponseEntity.ok(user);
+        } catch (Error e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", e.getMessage()));
         }
-        logger.info("le password match, je retourne un token");
-        String token = "youpi, j ai maintenant la logique jwt à implementer";
-        return ResponseEntity.ok("Login successful. Token: " + token);
     }
 }

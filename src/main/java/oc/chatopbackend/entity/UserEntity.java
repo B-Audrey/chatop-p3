@@ -1,8 +1,12 @@
 package oc.chatopbackend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -13,6 +17,7 @@ import java.util.Collection;
 @Getter
 @Entity
 @Table(name = "USERS")
+@EntityListeners(AuditingEntityListener.class) // Pour les champs created_at et updated_at
 public class UserEntity implements UserDetails {
 
     // Getters and Setters
@@ -26,28 +31,31 @@ public class UserEntity implements UserDetails {
     @Column(nullable = false)
     private String name;
 
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
 
-    @Column(name = "created_at", nullable = false, updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime createdAt;
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false, insertable = false)
+    private LocalDateTime created_at;
 
-    @Column(name = "updated_at", nullable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-    private LocalDateTime updatedAt;
+    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false, insertable = false)
+    private LocalDateTime updated_at;
 
+    public UserEntity() {
+    }
 
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return null; // unused for now, no roles, everyone is user
     }
 
+    @JsonIgnore
     @Override
     public String getUsername() {
         return email; // use Email as name to find user
-    }
-
-    public UserEntity() {
-
     }
 }
 
