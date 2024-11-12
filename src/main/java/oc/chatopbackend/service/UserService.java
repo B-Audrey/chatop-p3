@@ -54,7 +54,7 @@ public class UserService {
 
     public UserModel getUserById(int id) throws Exception {
         UserEntity userEntity = userRepository.findById(id)
-                .orElseThrow(() -> new Exception("User not found"));
+                .orElseThrow(() -> new Exception("user not found"));
         return convertToDto(userEntity);
     }
 }

@@ -3,6 +3,7 @@ package oc.chatopbackend.controller;
 import oc.chatopbackend.dto.AuthLoginDto;
 import oc.chatopbackend.dto.AuthRegisterDto;
 import oc.chatopbackend.entity.UserEntity;
+import oc.chatopbackend.model.ErrorResponseModel;
 import oc.chatopbackend.model.UserModel;
 import oc.chatopbackend.service.JwtService;
 import oc.chatopbackend.service.UserService;
@@ -33,21 +34,21 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity register(@RequestBody AuthRegisterDto authRegisterDto) {
+    public ResponseEntity<?> register(@RequestBody AuthRegisterDto authRegisterDto) {
         try {
             UserEntity newUser = userService.registerUser(authRegisterDto);
             UserModel createdUser = userService.convertToDto(newUser);
             return ResponseEntity.ok(createdUser);
         } catch (Exception e) {
             String message = e.getMessage();
-            logger.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(message);
+            logger.warn(message);
+            ErrorResponseModel errorResponse = new ErrorResponseModel(HttpStatus.BAD_REQUEST.value(), message);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
 
     @PostMapping("/login")
-    public ResponseEntity login(@RequestBody AuthLoginDto authLoginDto) {
+    public ResponseEntity<?> login(@RequestBody AuthLoginDto authLoginDto) {
         try {
             UserEntity user = userService.getUserByEmail(authLoginDto.getEmail());
             if (!userService.validatePassword(authLoginDto.getPassword(), user.getPassword())) {
@@ -58,14 +59,14 @@ public class AuthController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             String message = e.getMessage();
-            logger.error(message);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", message));
+            logger.warn(message);
+            ErrorResponseModel errorResponse = new ErrorResponseModel(HttpStatus.NOT_FOUND.value(), message);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
 
     @GetMapping("/me")
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ResponseEntity getTokenFromRequest(@RequestHeader("Authorization") String authorizationHeader) throws Exception {
+    public ResponseEntity<?> getTokenFromRequest(@RequestHeader("Authorization") String authorizationHeader) {
         try {
             String token = authorizationHeader.substring(7);
             Map<String, Object> decodedJwtData = jwtService.decryptUserByItsToken(token);
@@ -73,10 +74,16 @@ public class AuthController {
             int userId = Integer.parseInt(userIdStr);
             UserModel user = userService.getUserById(userId);
             return ResponseEntity.ok(user);
-        } catch (Error e) {
+        } catch (Exception e) {
+            if ("user not found".equals(e.getMessage())) {
+                logger.warn("An unknown user tried to ask for me info with a valid token!");
+                ErrorResponseModel errorResponse = new ErrorResponseModel(HttpStatus.NOT_FOUND.value(), e.getMessage());
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            }
             logger.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("message", e.getMessage()));
+            ErrorResponseModel errorResponse = new ErrorResponseModel(HttpStatus.UNAUTHORIZED.value(), e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         }
     }
+
 }
