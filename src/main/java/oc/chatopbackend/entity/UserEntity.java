@@ -16,7 +16,7 @@ import java.util.Collection;
 @Setter
 @Getter
 @Entity
-@Table(name = "USERS")
+@Table(name = "users")
 @EntityListeners(AuditingEntityListener.class) // Pour les champs created_at et updated_at
 public class UserEntity implements UserDetails {
 

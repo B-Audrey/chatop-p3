@@ -32,7 +32,7 @@ public class JwtService {
                 .issuedAt(now)
                 .expiresAt(now.plus(1, ChronoUnit.DAYS))
                 .id(String.valueOf(user.getId()))
-                .subject(String.valueOf(user.getName()))
+                .subject(user.getUsername())
                 .build();
         JwtEncoderParameters jwtEncoderParameters = JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256)
                                                                                       .build(), claims);

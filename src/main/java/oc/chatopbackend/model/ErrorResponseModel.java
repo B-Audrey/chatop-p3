@@ -1,7 +1,10 @@
 package oc.chatopbackend.model;
 
+import lombok.Getter;
+
 import java.time.LocalDateTime;
 
+@Getter
 public class ErrorResponseModel {
 
     private final LocalDateTime timestamp;
@@ -12,18 +15,6 @@ public class ErrorResponseModel {
         this.timestamp = LocalDateTime.now();
         this.status = status;
         this.message = message;
-    }
-
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
-
-    public int getStatus() {
-        return status;
-    }
-
-    public String getMessage() {
-        return message;
     }
 
 }
