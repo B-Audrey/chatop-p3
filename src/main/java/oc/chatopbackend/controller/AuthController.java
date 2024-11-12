@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.webjars.NotFoundException;
 
 import java.util.Map;
 
@@ -48,11 +47,11 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody AuthLoginDto authLoginDto) {
+    public ResponseEntity login(@RequestBody AuthLoginDto authLoginDto) {
         try {
             UserEntity user = userService.getUserByEmail(authLoginDto.getEmail());
             if (!userService.validatePassword(authLoginDto.getPassword(), user.getPassword())) {
-                throw new NotFoundException("Unable to log in");
+                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Invalid connection");
             }
             String token = jwtService.generateToken(user);
             Map<String, String> response = Map.of("token", token);
