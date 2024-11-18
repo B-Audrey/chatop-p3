@@ -1,28 +1,23 @@
 package oc.chatopbackend.service;
 
+import lombok.RequiredArgsConstructor;
 import oc.chatopbackend.dto.AuthRegisterDto;
 import oc.chatopbackend.entity.UserEntity;
 import oc.chatopbackend.model.UserModel;
 import oc.chatopbackend.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
-
-    public UserModel convertToDto(UserEntity user) {
+    public UserModel convertToUserModel(UserEntity user) {
         return new UserModel(user.getId(),
                              user.getEmail(),
                              user.getName(),
@@ -48,13 +43,9 @@ public class UserService {
                 .orElseThrow(() -> new Exception("User not found"));
     }
 
-    public boolean validatePassword(String rawPassword, String encodedPassword) {
-        return passwordEncoder.matches(rawPassword, encodedPassword);
-    }
-
-    public UserModel getUserById(int id) throws Exception {
+    public UserModel getUserById(Long id) throws Exception {
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new Exception("user not found"));
-        return convertToDto(userEntity);
+        return convertToUserModel(userEntity);
     }
 }

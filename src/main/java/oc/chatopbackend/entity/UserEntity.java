@@ -2,28 +2,27 @@ package oc.chatopbackend.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 
-@Setter
-@Getter
+@Data
 @Entity
-@Table(name = "USERS")
+@Table(name = "users")
 @EntityListeners(AuditingEntityListener.class) // Pour les champs created_at et updated_at
 public class UserEntity implements UserDetails {
 
-    // Getters and Setters
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -49,7 +48,7 @@ public class UserEntity implements UserDetails {
     @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null; // unused for now, no roles, everyone is user
+        return List.of(new SimpleGrantedAuthority("USER")); // unused for now, no roles, everyone is user
     }
 
     @JsonIgnore
