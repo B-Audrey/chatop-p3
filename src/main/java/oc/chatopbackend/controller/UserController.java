@@ -1,11 +1,10 @@
 package oc.chatopbackend.controller;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import oc.chatopbackend.model.ErrorResponseModel;
 import oc.chatopbackend.model.UserModel;
 import oc.chatopbackend.service.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -16,28 +15,24 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/users")
+@RequiredArgsConstructor
+@Slf4j
 @Validated
 public class UserController {
 
-    public static final Logger logger = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
 
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
-
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable int id) {
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
         try {
             UserModel user = userService.getUserById(id);
             return ResponseEntity.ok(user);
         } catch (Exception e) {
             String message = e.getMessage();
-            logger.warn(message);
+            log.warn(message);
             ErrorResponseModel errorResponse = new ErrorResponseModel(HttpStatus.NOT_FOUND.value(), message);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            return ResponseEntity.status(errorResponse.getStatus()).body(errorResponse);
         }
     }
 

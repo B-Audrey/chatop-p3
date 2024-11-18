@@ -19,10 +19,7 @@ public class RentalService {
         return rentalRepository.findAll();
     }
 
-    public RentalEntity createRental(RentalEntity rentalEntity, Integer ownerId) {
-        // Ajouter l'ID du propriétaire
-        rentalEntity.setOwnerId(ownerId);
-        // Enregistrer l'entité dans la base de données
+    public RentalEntity createRental(RentalEntity rentalEntity, Long ownerId) {
         return rentalRepository.save(rentalEntity);
     }
 

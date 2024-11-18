@@ -11,6 +11,8 @@ import org.springframework.context.event.EventListener;
 @SpringBootApplication
 public class ChatopApplication {
 
+//    Swagger is here : http://localhost:3001/swagger-ui/index.html#/
+
     public static final Logger logger = LoggerFactory.getLogger(ChatopApplication.class);
 
     public static void main(String[] args) {

@@ -1,23 +1,21 @@
 package oc.chatopbackend.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
+@Data
 @Entity
 @Table(name = "rentals")
 @EntityListeners(AuditingEntityListener.class) // Pour les champs created_at et updated_at
 public class RentalEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column
     private String name;
@@ -35,7 +33,7 @@ public class RentalEntity {
     private String description;
 
     @Column(name = "owner_id")
-    private Integer ownerId;
+    private Long ownerId;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
