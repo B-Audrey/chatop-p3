@@ -19,10 +19,12 @@ public class RentalService {
         return rentalRepository.findAll();
     }
 
-    public RentalEntity createRental(RentalEntity rentalEntity, Long ownerId) {
+    public RentalEntity saveRental(RentalEntity rentalEntity) {
         return rentalRepository.save(rentalEntity);
     }
 
-
+    public RentalEntity getRentalById(Long id) {
+        return rentalRepository.findById(id).orElse(null);
+    }
 }
 
