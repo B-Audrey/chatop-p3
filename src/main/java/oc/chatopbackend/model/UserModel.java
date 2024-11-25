@@ -1,12 +1,10 @@
 package oc.chatopbackend.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
+@Data
 public class UserModel {
     private Long id;
     private String email;
