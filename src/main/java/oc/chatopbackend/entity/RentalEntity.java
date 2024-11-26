@@ -8,6 +8,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Entity
@@ -34,8 +35,12 @@ public class RentalEntity {
     @Column(length = 1000)
     private String description;
 
-    @Column(name = "owner_id")
-    private Long ownerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private UserEntity user;
+
+    @OneToMany(mappedBy = "rental", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MessageEntity> messages;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)

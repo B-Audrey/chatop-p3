@@ -35,12 +35,17 @@ public class UserEntity implements UserDetails {
     private String password;
 
     @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false, insertable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime created_at;
 
     @LastModifiedDate
-    @Column(name = "updated_at", nullable = false, insertable = false)
+    @Column(name = "updated_at")
     private LocalDateTime updated_at;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MessageEntity> messages;
+
 
     public UserEntity() {
     }

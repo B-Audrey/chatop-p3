@@ -65,7 +65,7 @@ public class RentalController {
                 throw new Exception("Rental not found with ID: " + id);
             }
             RentalModel rentalModel = convertToModel(rentalEntity);
-            return ResponseEntity.ok(Map.of("rental", rentalModel));
+            return ResponseEntity.ok(rentalModel);
 
         } catch (Exception e) {
             ErrorResponseModel errorResponse = new ErrorResponseModel(HttpStatus.NOT_FOUND.value(), e.getMessage());
@@ -83,7 +83,7 @@ public class RentalController {
                 RentalEntity rentalEntity = convertToEntity(rentalDto);
                 String picturePath = savePictureToGetPath(pictureFile);
                 rentalEntity.setPicture(picturePath);
-                rentalEntity.setOwnerId(reqUser.getId());
+                rentalEntity.setUser(reqUser);
                 RentalEntity rentalEntitySaved = rentalService.saveRental(rentalEntity);
                 if (rentalEntitySaved.getId() != null) {
                     return ResponseEntity.ok("Rental created !");
@@ -119,7 +119,7 @@ public class RentalController {
             if (existingRental == null) {
                 throw new Exception("Rental not found");
             }
-            if (!existingRental.getOwnerId().equals(reqUser.getId())) {
+            if (!existingRental.getUser().getId().equals(reqUser.getId())) {
                 throw new Exception("You are not authorized to modify this rental");
             }
             existingRental.setName(rentalDto.getName());
@@ -143,7 +143,7 @@ public class RentalController {
 
     private String savePictureToGetPath(MultipartFile pictureFile) throws Exception {
         String projectDir = System.getProperty("user.dir");
-        String uploadDir = projectDir + "/uploads/";
+        String uploadDir = projectDir + "/src/main/uploads/";
         Path uploadPath = Paths.get(uploadDir);
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
