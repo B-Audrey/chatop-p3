@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
 
@@ -142,16 +143,19 @@ public class RentalController {
 
 
     private String savePictureToGetPath(MultipartFile pictureFile) throws Exception {
-        String projectDir = System.getProperty("user.dir");
-        String uploadDir = projectDir + "/src/main/uploads/";
-        Path uploadPath = Paths.get(uploadDir);
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
-        }
-        String fileName = System.currentTimeMillis() + "_" + pictureFile.getOriginalFilename(); // use time to avoid
-        // doubles
-        Path filePath = Paths.get(uploadDir + fileName);
-        return filePath.toString();
+        // Définir le répertoire de stockage
+        String staticDir = System.getProperty("user.dir") + "/src/main/resources/static/";
+        Path uploadPath = Paths.get(staticDir);
+
+        // Générer un nom de fichier unique
+        String fileName = "uploads/" + System.currentTimeMillis() + "_" + pictureFile.getOriginalFilename();
+        Path filePath = uploadPath.resolve(fileName);
+
+        // Enregistrer le fichier
+        Files.copy(pictureFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+        // Retourner une URL sous /static/uploads
+        return "http://localhost:3001/" + fileName;
     }
 
 
