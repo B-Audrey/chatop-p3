@@ -36,8 +36,9 @@ public class AuthController {
     public ResponseEntity<?> register(@RequestBody AuthRegisterDto authRegisterDto) {
         try {
             UserEntity newUser = userService.registerUser(authRegisterDto);
-            UserModel createdUser = userService.convertToUserModel(newUser);
-            return ResponseEntity.ok(createdUser);
+            Map<String, Object> authData = new HashMap<>();
+            authData.put("token", jwtUtils.generateToken(newUser.getEmail()));
+            return ResponseEntity.ok(authData);
         } catch (Exception e) {
             String message = e.getMessage();
             log.warn(message);
