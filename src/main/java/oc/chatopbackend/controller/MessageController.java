@@ -1,5 +1,12 @@
 package oc.chatopbackend.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,11 +30,39 @@ import java.util.Map;
 @RequestMapping("/api/messages")
 @RequiredArgsConstructor
 @Valid
+@Tag(name = "MESSAGES", description = "Endpoints for messages operations")
 public class MessageController {
 
     private final MessageService messageService;
 
     @PostMapping
+    @Operation(
+            summary = "Post a message to a user",
+            description = "Saves the message along with the linked user and rental, and returns a confirmation.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Message sent successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(example = "{\"message\":\"Message sent with success\"}")
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid data provided",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                            ErrorResponseModel.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                            ErrorResponseModel.class))
+            )
+    })
     public ResponseEntity<?> createMessage(@RequestBody MessageDto messageDto, HttpServletRequest request) {
         try {
             UserEntity reqUser = (UserEntity) request.getAttribute("user");
@@ -47,7 +82,7 @@ public class MessageController {
 
             messageService.saveMessage(messageEntity);
 
-            return ResponseEntity.status(HttpStatus.CREATED)
+            return ResponseEntity.status(HttpStatus.OK)
                     .body(Map.of("message", "Message sent with success"));
 
         } catch (Exception e) {

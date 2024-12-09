@@ -31,10 +31,7 @@ public class JwtUtils {
 
     public String generateToken(String userEmail) {
         Map<String, Object> claims = new HashMap<>();
-        log.warn("generate token");
-        String token = createToken(claims, userEmail);
-        log.warn("generated token: {}", token);
-        return token;
+        return createToken(claims, userEmail);
     }
 
     private String createToken(Map<String, Object> claims, String email) {

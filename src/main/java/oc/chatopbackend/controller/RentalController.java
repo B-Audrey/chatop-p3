@@ -1,5 +1,12 @@
 package oc.chatopbackend.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +36,7 @@ import java.util.Map;
 @Slf4j
 @RequiredArgsConstructor
 @Validated
+@Tag(name = "RENTALS", description = "Endpoints for rentals opérations")
 public class RentalController {
 
     private final RentalService rentalService;
@@ -43,6 +51,29 @@ public class RentalController {
     }
 
     @GetMapping
+    @Operation(
+            summary = "Get every rentals",
+            description = "Returns an array of all rentals",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Rentals are sent with success",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(example = "{\"rentals\":[{\"id\":1,\"name\":\"Location 1\"," +
+                                    "\"surface\":50,\"price\":500,\"description\":\"Une belle location\"," +
+                                    "\"picture\":\"http://myPath...\"}]}")
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                            ErrorResponseModel.class))
+            ),
+    })
     public ResponseEntity<?> getAllRentals() {
         try {
             List<RentalEntity> rentalEntities = rentalService.getAllRentals();
@@ -59,6 +90,33 @@ public class RentalController {
     }
 
     @GetMapping("/{id}")
+    @Operation(
+            summary = "Get a rental by ID",
+            description = "Retrieve a specific rental from the database by its unique ID",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Rental found and sent in response",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = RentalModel.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                            ErrorResponseModel.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Rental not found in DB",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                            ErrorResponseModel.class))
+            )
+    })
     public ResponseEntity<?> getRentalById(@PathVariable Long id) {
         try {
             RentalEntity rentalEntity = rentalService.getRentalById(id);
@@ -76,6 +134,37 @@ public class RentalController {
 
 
     @PostMapping(consumes = "multipart/form-data")
+    @Operation(
+            summary = "Post a new rental",
+            description = "Save a new rental in the database and save the picture in the server",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Rental created with success",
+                    content = @Content(mediaType = "application/json", schema = @Schema(example = "\"Rental created " +
+                            "!\""))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid data",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                            ErrorResponseModel.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                            ErrorResponseModel.class))
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Error on rental creation",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                            ErrorResponseModel.class))
+            )
+    })
     public ResponseEntity<?> createRental(HttpServletRequest request, @ModelAttribute RentalDto rentalDto) {
         try {
             UserEntity reqUser = (UserEntity) request.getAttribute("user");
@@ -87,7 +176,8 @@ public class RentalController {
                 rentalEntity.setUser(reqUser);
                 RentalEntity rentalEntitySaved = rentalService.saveRental(rentalEntity);
                 if (rentalEntitySaved.getId() != null) {
-                    return ResponseEntity.ok("Rental created !");
+                    return ResponseEntity.status(HttpStatus.OK)
+                            .body(Map.of("message", "Rental created !"));
                 } else {
                     log.warn("something went bad on rental creation");
                     throw new Exception("rental creation failed");
@@ -95,7 +185,6 @@ public class RentalController {
             } else {
                 throw new Exception("image cannot be saved");
             }
-
         } catch (Exception e) {
             String error = e.getMessage();
             int httpCode = HttpStatus.BAD_REQUEST.value();
@@ -108,11 +197,41 @@ public class RentalController {
     }
 
     @PutMapping(path = "/{rentalId}", consumes = "multipart/form-data")
+    @Operation(
+            summary = "Put a rental by ID",
+            description = "Update a rental properties in the database",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Rental updated with success",
+                    content = @Content(mediaType = "application/json", schema = @Schema(example = "{\"message" +
+                            "\":\"Rental updated !\"}"))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid data",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                            ErrorResponseModel.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                            ErrorResponseModel.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "The rental to update is not found in DB",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                            ErrorResponseModel.class))
+            )
+    })
     public ResponseEntity<?> updateRental(HttpServletRequest request, @ModelAttribute RentalUpdateDto rentalDto,
             @PathVariable Long rentalId) {
         try {
             UserEntity reqUser = (UserEntity) request.getAttribute("user");
-            log.debug("{} is updating its rental {}", reqUser.toString(), rentalId);
             if (rentalId == null) {
                 throw new Exception("Rental ID is required for update");
             }
@@ -128,7 +247,8 @@ public class RentalController {
             existingRental.setPrice(rentalDto.getPrice());
             existingRental.setDescription(rentalDto.getDescription());
             rentalService.saveRental(existingRental);
-            return ResponseEntity.ok("Rental updated !");
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(Map.of("message", "Rental updated !"));
 
         } catch (Exception e) {
             String error = e.getMessage();
@@ -144,7 +264,7 @@ public class RentalController {
 
     private String savePictureToGetPath(MultipartFile pictureFile) throws Exception {
         // Définir le répertoire de stockage
-        String staticDir = System.getProperty("user.dir") + "/src/main/resources/static/";
+        String staticDir = System.getProperty("user.dir") + "/";
         Path uploadPath = Paths.get(staticDir);
 
         // Générer un nom de fichier unique
@@ -157,6 +277,5 @@ public class RentalController {
         // Retourner une URL sous /static/uploads
         return "http://localhost:3001/" + fileName;
     }
-
 
 }
