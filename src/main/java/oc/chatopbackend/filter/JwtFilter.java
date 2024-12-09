@@ -31,7 +31,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws ServletException, IOException {
-        log.warn("JE PASSE PAR LE FILTRE JWT");
         final String authorizationHeader = req.getHeader("Authorization");
         String useremail = null;
         String jwtToken = null;
@@ -67,7 +66,7 @@ public class JwtFilter extends OncePerRequestFilter {
         List<String> PUBLIC_PATHS = List.of("/api/auth/register",
                                             "/api/auth/login",
                                             "/swagger-ui/",
-                                            "/uploads/"
+                                            "/uploads/**"
         );
         String path = request.getServletPath();
         return PUBLIC_PATHS.contains(path);
