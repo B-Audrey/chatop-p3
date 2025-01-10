@@ -4,24 +4,26 @@
 
 Ton run this project, you need to have the following tools installed on your computer :
 
-* Java 21
-* Maven 3.8.3
+* Java 21 : https://www.oracle.com/java/technologies/javase-jdk11-downloads.html
+* Maven : https://maven.apache.org/download.cgi
 * Docker : https://www.docker.com/get-started/
 
-If you use sdkman to manage your java version, you can install java 21 and use the following command :
+* sdkman is optionnal : https://sdkman.io/install
+
+You can use sdkman to manage your java version, you can install java 21 and use the following command :
 
 ``` bash
 sdk install 21.0.4-oracle
 sdk use java 21.0.4-oracle
 ``` 
 
-you can also find a file name .sdkmanrc to use :
+you can also find a file named .sdkmanrc to easily change version between projects by using the following command :
 
 ``` bash
 sdk env
 ```
 
-## DB
+## INIT DB
 
 command to init a new db in docker :
 
@@ -47,11 +49,34 @@ to remove db :
 docker rm chatop
 ```
 
-### Script to init your data base :
+You dont need to populate DB as the app will sync the db with the entities at the start of the app by the synchonize
+option set to true.
 
-You dont need to populate your data as the app will sync the db with the entities at the start of the app by the
-synchonize option is true.
-For production, think about removing synchronize and use the following script to create your db :
+## Running the application
+
+To run the application, you can use the following command :
+
+``` bash
+mvn spring-boot:run
+```
+
+# Resources
+
+## OPEN API documentation :
+
+You can access the open api documentation at the following url :
+http://localhost:3001/swagger-ui/index.html#/
+
+## Commit
+
+This project is versioned on github and using the conventional commit message format.
+You can find more information about it here : https://www.conventionalcommits.org/en/v1.0.0/
+
+### Script to populate your data base (optional) :
+
+YOU DONT NEED to populate your data as the app will sync the db with the entities at the start of the app by the
+synchonize option set to true.
+For production, think about removing synchronize true to go false :
 
 ``` sql
 
@@ -100,16 +125,6 @@ ADD CONSTRAINT `fk_rental`
 FOREIGN KEY (`rental_id`) REFERENCES `RENTALS`(`id`);
 
 ```
-
-## OPEN API documentation :
-
-You can access the open api documentation at the following url :
-http://localhost:3001/swagger-ui/index.html#/
-
-### Commit
-
-This project is versioned on github and using the conventional commit message format.
-You can find more information about it here : https://www.conventionalcommits.org/en/v1.0.0/
 
 ### Reference Documentation
 
