@@ -54,7 +54,13 @@ option set to true.
 
 ## Running the application
 
-To run the application, you can use the following command :
+To run the application, you first need to install then run, you can use the following command :
+
+``` bash
+mvn clean install
+```
+
+Then you can run the application by using the following command :
 
 ``` bash
 mvn spring-boot:run
