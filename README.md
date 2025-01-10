@@ -8,9 +8,9 @@ Ton run this project, you need to have the following tools installed on your com
 * Maven : https://maven.apache.org/download.cgi
 * Docker : https://www.docker.com/get-started/
 
-* sdkman is optionnal : https://sdkman.io/install
-
-You can use sdkman to manage your java version, you can install java 21 and use the following command :
+* Sdkman (is optionnal if you already have the Java 21 version) : https://sdkman.io/install
+  You can use sdkman to manage your java version, you can install java 21.0.4-oracle and use it by the following
+  command :
 
 ``` bash
 sdk install 21.0.4-oracle
