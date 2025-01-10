@@ -47,40 +47,25 @@ public class RentalController {
     }
 
     public RentalModel convertToModel(RentalEntity rentalEntity) {
-        return modelMapper.map(rentalEntity, RentalModel.class);
+        RentalModel rentalModel = modelMapper.map(rentalEntity, RentalModel.class);
+        // add ownerId to the model
+        rentalModel.setOwnerId(rentalEntity.getUser().getId());
+        return rentalModel;
     }
 
     @GetMapping
-    @Operation(
-            summary = "Get every rentals",
-            description = "Returns an array of all rentals",
-            security = @SecurityRequirement(name = "bearerAuth")
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Rentals are sent with success",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(example = "{\"rentals\":[{\"id\":1,\"name\":\"Location 1\"," +
-                                    "\"surface\":50,\"price\":500,\"description\":\"Une belle location\"," +
-                                    "\"picture\":\"http://myPath...\"}]}")
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation =
-                            ErrorResponseModel.class))
-            ),
-    })
+    @Operation(summary = "Get every rentals", description = "Returns an array of all rentals", security =
+    @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Rentals are sent with success", content =
+    @Content(mediaType = "application/json", schema = @Schema(example = "{\"rentals\":[{\"id\":1,\"name\":\"Location " +
+            "1\"," + "\"surface\":50,\"price\":500,\"description\":\"Une belle location\"," + "\"picture\":\"http" +
+            "://myPath...\"}]}"))), @ApiResponse(responseCode = "401", description = "Unauthorized", content =
+    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponseModel.class))),})
     public ResponseEntity<?> getAllRentals() {
         try {
             List<RentalEntity> rentalEntities = rentalService.getAllRentals();
 
-            List<RentalModel> rentals = rentalEntities.stream()
-                    .map(this::convertToModel)
-                    .toList();
+            List<RentalModel> rentals = rentalEntities.stream().map(this::convertToModel).toList();
             return ResponseEntity.ok(Map.of("rentals", rentals));
 
         } catch (Exception e) {
@@ -90,33 +75,14 @@ public class RentalController {
     }
 
     @GetMapping("/{id}")
-    @Operation(
-            summary = "Get a rental by ID",
-            description = "Retrieve a specific rental from the database by its unique ID",
-            security = @SecurityRequirement(name = "bearerAuth")
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Rental found and sent in response",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = RentalModel.class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation =
-                            ErrorResponseModel.class))
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Rental not found in DB",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation =
-                            ErrorResponseModel.class))
-            )
-    })
+    @Operation(summary = "Get a rental by ID", description = "Retrieve a specific rental from the database by its " +
+            "unique ID", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Rental found and sent in response", content =
+    @Content(mediaType = "application/json", schema = @Schema(implementation = RentalModel.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType =
+                    "application/json", schema = @Schema(implementation = ErrorResponseModel.class))),
+            @ApiResponse(responseCode = "404", description = "Rental not found in DB", content = @Content(mediaType =
+                    "application/json", schema = @Schema(implementation = ErrorResponseModel.class)))})
     public ResponseEntity<?> getRentalById(@PathVariable Long id) {
         try {
             RentalEntity rentalEntity = rentalService.getRentalById(id);
@@ -134,37 +100,16 @@ public class RentalController {
 
 
     @PostMapping(consumes = "multipart/form-data")
-    @Operation(
-            summary = "Post a new rental",
-            description = "Save a new rental in the database and save the picture in the server",
-            security = @SecurityRequirement(name = "bearerAuth")
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Rental created with success",
-                    content = @Content(mediaType = "application/json", schema = @Schema(example = "\"Rental created " +
-                            "!\""))
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid data",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation =
-                            ErrorResponseModel.class))
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation =
-                            ErrorResponseModel.class))
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "Error on rental creation",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation =
-                            ErrorResponseModel.class))
-            )
-    })
+    @Operation(summary = "Post a new rental", description = "Save a new rental in the database and save the picture " +
+            "in the server", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Rental created with success", content =
+    @Content(mediaType = "application/json", schema = @Schema(example = "\"Rental created " + "!\""))),
+            @ApiResponse(responseCode = "400", description = "Invalid data", content = @Content(mediaType =
+                    "application/json", schema = @Schema(implementation = ErrorResponseModel.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType =
+                    "application/json", schema = @Schema(implementation = ErrorResponseModel.class))),
+            @ApiResponse(responseCode = "500", description = "Error on rental creation", content =
+            @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponseModel.class)))})
     public ResponseEntity<?> createRental(HttpServletRequest request, @ModelAttribute RentalDto rentalDto) {
         try {
             UserEntity reqUser = (UserEntity) request.getAttribute("user");
@@ -176,8 +121,7 @@ public class RentalController {
                 rentalEntity.setUser(reqUser);
                 RentalEntity rentalEntitySaved = rentalService.saveRental(rentalEntity);
                 if (rentalEntitySaved.getId() != null) {
-                    return ResponseEntity.status(HttpStatus.OK)
-                            .body(Map.of("message", "Rental created !"));
+                    return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "Rental created !"));
                 } else {
                     log.warn("something went bad on rental creation");
                     throw new Exception("rental creation failed");
@@ -197,37 +141,16 @@ public class RentalController {
     }
 
     @PutMapping(path = "/{rentalId}", consumes = "multipart/form-data")
-    @Operation(
-            summary = "Put a rental by ID",
-            description = "Update a rental properties in the database",
-            security = @SecurityRequirement(name = "bearerAuth")
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Rental updated with success",
-                    content = @Content(mediaType = "application/json", schema = @Schema(example = "{\"message" +
-                            "\":\"Rental updated !\"}"))
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid data",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation =
-                            ErrorResponseModel.class))
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation =
-                            ErrorResponseModel.class))
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "The rental to update is not found in DB",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation =
-                            ErrorResponseModel.class))
-            )
-    })
+    @Operation(summary = "Put a rental by ID", description = "Update a rental properties in the database", security =
+    @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Rental updated with success", content =
+    @Content(mediaType = "application/json", schema = @Schema(example = "{\"message" + "\":\"Rental updated !\"}"))),
+            @ApiResponse(responseCode = "400", description = "Invalid data", content = @Content(mediaType =
+                    "application/json", schema = @Schema(implementation = ErrorResponseModel.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType =
+                    "application/json", schema = @Schema(implementation = ErrorResponseModel.class))),
+            @ApiResponse(responseCode = "404", description = "The rental to update is not found in DB", content =
+            @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponseModel.class)))})
     public ResponseEntity<?> updateRental(HttpServletRequest request, @ModelAttribute RentalUpdateDto rentalDto,
             @PathVariable Long rentalId) {
         try {
@@ -247,8 +170,7 @@ public class RentalController {
             existingRental.setPrice(rentalDto.getPrice());
             existingRental.setDescription(rentalDto.getDescription());
             rentalService.saveRental(existingRental);
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(Map.of("message", "Rental updated !"));
+            return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "Rental updated !"));
 
         } catch (Exception e) {
             String error = e.getMessage();

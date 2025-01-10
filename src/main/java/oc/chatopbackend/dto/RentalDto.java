@@ -23,6 +23,7 @@ public class RentalDto {
     private MultipartFile picture;
 
     @Size(min = 2, message = "Description must have minimum 2 characters")
+    @NotNull(message = "Description is required")
     private String description;
 
     private String createdAt;
