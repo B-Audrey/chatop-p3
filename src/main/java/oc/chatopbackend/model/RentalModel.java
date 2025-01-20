@@ -10,7 +10,7 @@ public class RentalModel {
     private Integer price;
     private String picture; //local path from server folder assets
     private String description;
-    private Long ownerId;
+    private Long owner_id;
     private String created_at;
     private String updated_at;
 
@@ -20,7 +20,7 @@ public class RentalModel {
     @Override
     public String toString() {
         return ("Rental : {id:" + id + ", name:" + name + ", surface:" + surface + ", price:" + price
-                + ", picture:" + picture + ", description:" + description + ", ownerId:" + ownerId
+                + ", picture:" + picture + ", description:" + description + ", ownerId:" + owner_id
                 + ", created_at:" + created_at + ", updated_at:" + updated_at + "}");
     }
 }

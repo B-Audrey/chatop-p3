@@ -49,7 +49,7 @@ public class RentalController {
     public RentalModel convertToModel(RentalEntity rentalEntity) {
         RentalModel rentalModel = modelMapper.map(rentalEntity, RentalModel.class);
         // add ownerId to the model
-        rentalModel.setOwnerId(rentalEntity.getUser().getId());
+        rentalModel.setOwner_id(rentalEntity.getUser().getId());
         return rentalModel;
     }
 

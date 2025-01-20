@@ -16,6 +16,7 @@ public class RentalUpdateDto {
     @NotNull(message = "Price is required")
     private Integer price;
 
+    @NotNull(message = "Description is required")
     @Size(min = 2, message = "Description must have minimum 2 characters")
     private String description;
 }
